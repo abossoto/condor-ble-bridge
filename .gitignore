@@ -1,0 +1,5 @@
+/condor-ble-bridge
+*.log
+udp-dump*.txt
+forum-post*.txt
+.DS_Store

@@ -1,0 +1,17 @@
+; Esempio di UDP.ini per Condor 3 (cartella di installazione di Condor).
+; Chiavi ricavate da forum e documentazione di terze parti, NON verificate su Condor 3.1.0.
+; La sezione esatta di ExtendedData / ExtendedData1 / LogToFile: DATI NON TROVATI.
+; Consiglio: partire dal file UDP.ini già presente e cambiare solo i valori.
+
+[General]
+Enabled=1
+
+[Connection]
+Host=127.0.0.1
+Port=55278
+
+[Misc]
+SendIntervalMs=100
+ExtendedData=1
+ExtendedData1=1
+LogToFile=1

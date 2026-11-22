@@ -25,9 +25,9 @@ Requires Apple's command-line developer tools (`xcode-select --install`).
 
 ## One-time setup
 
-### 1. Register COM1 in Wine
+### 1. Register COM1 in Wine (automatic)
 
-Adding a `com1` link in the prefix's `dosdevices` folder is **not** enough: Condor reads its port list from `HKLM\HARDWARE\DEVICEMAP\SERIALCOMM`, which Wine fills at start-up from `HKLM\Software\Wine\Ports`. With Condor closed:
+`Condor.command` does this by itself the first time it runs (with Condor closed). For reference: adding a `com1` link in the prefix's `dosdevices` folder is **not** enough, because Condor reads its port list from `HKLM\HARDWARE\DEVICEMAP\SERIALCOMM`, which Wine fills at start-up from `HKLM\Software\Wine\Ports`. The manual equivalent is:
 
 ```bash
 WINEPREFIX="$HOME/Library/Application Support/app.mach9/prefix" /Applications/Mach9.app/Contents/Resources/wine/bin/wine reg add 'HKLM\Software\Wine\Ports' /v COM1 /t REG_SZ /d "$HOME/condor-com1" /f
@@ -45,7 +45,7 @@ Add the device `Condor3`. The first time, macOS asks for Bluetooth permission fo
 
 ## Every flight
 
-Double-click **`Condor.command`** in Finder (or run `./Condor.command`). It rebuilds if needed, starts the bridge, waits for the virtual port and then opens MACh9, which starts Condor (if Condor is the launcher's default game). Fly, and SeeYou Navigator connects by itself. Ctrl-C in the Terminal window stops the bridge.
+Double-click **`Condor.command`** in Finder (or run `./Condor.command`). If macOS blocks it, use System Settings > Privacy & Security > Open Anyway. It rebuilds if needed, registers COM1 in Wine the first time, starts the bridge, waits for the virtual port and then opens MACh9, which starts Condor (if Condor is the launcher's default game). Fly, and SeeYou Navigator connects by itself. Ctrl-C in the Terminal window stops the bridge.
 
 - `./Condor.command --no-mach9` starts only the bridge.
 - If Condor is already open, the script doesn't reopen it and warns you to restart it.

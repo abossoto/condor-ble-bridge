@@ -17,7 +17,7 @@ Dopo la configurazione iniziale (Passo 2, una volta sola):
 3. in SeeYou Navigator il dispositivo «Condor3» si collega da solo;
 4. a fine volo, Ctrl-C nella finestra del ponte (Condor resta aperto).
 
-Il ponte deve partire **prima** di Condor, altrimenti Condor non trova la porta: per questo lo script, se Condor è già aperto, non lo riapre e avvisa di riavviarlo. `./Condor.command --no-mach9` avvia solo il ponte. Lo script ricompila da solo se serve e avvisa se COM1 manca nel registro di Wine. Aperto dal Finder, gira nell'app Terminale, che al primo avvio chiede il permesso Bluetooth.
+Il ponte deve partire **prima** di Condor, altrimenti Condor non trova la porta: per questo lo script, se Condor è già aperto, non lo riapre e avvisa di riavviarlo. `./Condor.command --no-mach9` avvia solo il ponte. Lo script ricompila da solo se serve e, al primo avvio a Condor chiuso, registra COM1 nel registro di Wine. Se macOS lo blocca: Impostazioni di Sistema > Privacy e sicurezza > Apri comunque. Aperto dal Finder, gira nell'app Terminale, che al primo avvio chiede il permesso Bluetooth.
 
 ## Compilazione
 
@@ -79,7 +79,7 @@ Sotto Wine le porte COM sono collegamenti a device Unix, quindi non servono HW V
 ./condor-ble-bridge serial -v --link ~/condor-com1
 ```
 
-Poi bisogna dire al prefisso Wine di MACh9 che COM1 è `~/condor-com1`. Con MACh9 il prefisso è `~/Library/Application Support/app.mach9/prefix` e Condor gira da `prefix/drive_c/Condor3` (non da `/Applications/Condor3`). Il solo collegamento in `dosdevices` **non basta**: Condor prende l'elenco delle porte da `HKLM\HARDWARE\DEVICEMAP\SERIALCOMM`, che Wine compila all'avvio leggendo `HKLM\Software\Wine\Ports`. Procedura verificata il 22/11/2026 (una volta sola):
+Poi bisogna dire al prefisso Wine di MACh9 che COM1 è `~/condor-com1`. Con MACh9 il prefisso è `~/Library/Application Support/app.mach9/prefix` e Condor gira da `prefix/drive_c/Condor3` (non da `/Applications/Condor3`). Il solo collegamento in `dosdevices` **non basta**: Condor prende l'elenco delle porte da `HKLM\HARDWARE\DEVICEMAP\SERIALCOMM`, che Wine compila all'avvio leggendo `HKLM\Software\Wine\Ports`. `Condor.command` lo fa da solo al primo avvio; a mano, una volta sola:
 
 ```bash
 WINEPREFIX="$HOME/Library/Application Support/app.mach9/prefix" /Applications/Mach9.app/Contents/Resources/wine/bin/wine reg add 'HKLM\Software\Wine\Ports' /v COM1 /t REG_SZ /d "$HOME/condor-com1" /f

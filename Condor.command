@@ -17,12 +17,24 @@ if [ ! -x ./condor-ble-bridge ] || [ -n "$(find src -name '*.swift' -newer ./con
     ./build.sh
 fi
 
-# Controlli sul prefisso Wine di MACh9 (solo avvisi, non bloccano l'avvio).
+# Prima volta: registra COM1 nel registro di Wine (Wine\Ports), altrimenti Condor non vede la porta.
+# Il solo collegamento in dosdevices non basta: Wine compila l'elenco delle porte all'avvio da questa chiave.
+WINE=/Applications/Mach9.app/Contents/Resources/wine/bin/wine
 if [ ! -d "$PREFIX" ]; then
-    echo "ATTENZIONE: prefisso MACh9 non trovato in $PREFIX"
+    echo "ATTENZIONE: prefisso MACh9 non trovato in $PREFIX (Condor è installato in MACh9?)"
 elif ! grep -q '"COM1"="[^"]*condor-com1"' "$PREFIX/system.reg" 2>/dev/null; then
-    echo "ATTENZIONE: COM1 non risulta nel registro di Wine (Wine\\Ports): Condor non vedrà la porta."
-    echo "            Procedura nel README, sezione «Passo 2»."
+    if pgrep -qf 'Condor.exe'; then
+        echo "ATTENZIONE: COM1 non è ancora registrata in Wine. Chiudi Condor e rilancia questo script."
+    elif [ ! -x "$WINE" ]; then
+        echo "ATTENZIONE: Wine di MACh9 non trovato in $WINE: impossibile registrare COM1."
+    else
+        echo "Prima configurazione: registro COM1 in Wine (qualche secondo)…"
+        WINEPREFIX="$PREFIX" WINEDEBUG=-all "$WINE" reg add 'HKLM\Software\Wine\Ports' /v COM1 /t REG_SZ /d "$LINK" /f >/dev/null 2>&1 \
+            && echo "COM1 registrata." \
+            || echo "ATTENZIONE: registrazione di COM1 non riuscita (vedi README)."
+        # Aspetta che Wine si chiuda: Condor deve partire con una sessione nuova, che legge la porta.
+        WINEPREFIX="$PREFIX" "$(dirname "$WINE")/wineserver" -w 2>/dev/null || true
+    fi
 fi
 
 # Collegamento rimasto da un'esecuzione interrotta male: lo togliamo, il ponte lo ricrea.
